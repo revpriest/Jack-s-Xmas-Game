@@ -57,26 +57,30 @@ _root.videoClip.addEventListener("complete", listenerObject);
 
 
 _root.replayButton.onRelease = function(){
+    trace("Replay");
     setup();
 }
 
 
 _root.tweetButton.onRelease = function(){
     var mess = getMessageFromScore();
-    var url="http://twitter.com/intent/tweet?text="+mess+" - http://handsomejacks.co.uk/index.php/xmas-game";
+    var url="http://twitter.com/intent/tweet?text="+escape(mess+" - http://handsomejacks.co.uk/index.php/xmas-game");
 ;
+    trace("Fetched "+url);
     getURL(url);
 }
 
 
 _root.donateButton.onRelease = function(){
     var url="http://jackgames.commonshostage.com/";
+    trace("Fetched "+url);
     getURL(url);
 }
 
 _root.facebookButton.onRelease = function(){
     var mess = getMessageFromScore();
     var url="http://www.facebook.com/share.php?u=http://handsomejacks.co.uk/index.php/xmas-game";
+    trace("Fetched "+url);
     getURL(url);
 }
 
