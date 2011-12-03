@@ -6,13 +6,14 @@ var deceleration=0.9;
 var santaScale=20;
 var collisionDiameter = 0.078;
 var score=0;
+_root.canAdd = true;
 
 //We define the coordinates of the geometric display.
 //and work out the slope of the lines.
 //419 198
-var bottomLeftX = 104-419;  var bottomLeftY = 747-198;
-var topLeftX=755-419;       var topLeftY=517-198;
-var bottomRightX = 939-419; var bottomRightY = 806-198;
+var bottomLeftX = 0-500;  var bottomLeftY = 554;
+var topLeftX=910-500;       var topLeftY=350;
+var bottomRightX = 890-500; var bottomRightY = 662;
 var leftLinedx = topLeftX-bottomLeftX;
 var leftLinedy = topLeftY-bottomLeftY;
 var bottomLinedx = bottomRightX-bottomLeftX;
@@ -26,12 +27,9 @@ bashDesk.attachSound("banging");
 var claps = new Sound(this);
 claps.attachSound("claps");
 var gameEnded=false;
-_root.facebookButton._visible=false;
-_root.tweetButton._visible=false;
-_root.replayButton._visible=false;
 var startedAlready=false;
-var faceDirection = 0;
 var throwFrame=-1;
+var np=0;
 var walkAnimFrames = [2,3,4,5,6,7,8,7,6,5,4,3];
 var throwFrames = [9,10,11,12,13,14,15];
 var walkAnimFrame=0;
@@ -51,7 +49,7 @@ var screenHeight_2 = screenHeight/2;    //Half the height of the screen
 var listenerObject:Object = new Object();
 listenerObject.complete = function(eventObject:Object):Void {
     trace("Clip Ending");
-    endGame();
+//    endGame();
 };
 _root.videoClip.addEventListener("complete", listenerObject);
 
@@ -60,30 +58,6 @@ _root.replayButton.onRelease = function(){
     trace("Replay");
     setup();
 }
-
-
-_root.tweetButton.onRelease = function(){
-    var mess = getMessageFromScore();
-    var url="http://twitter.com/intent/tweet?text="+escape(mess+" - http://handsomejacks.co.uk/index.php/xmas-game");
-;
-    trace("Fetched "+url);
-    getURL(url);
-}
-
-
-_root.donateButton.onRelease = function(){
-    var url="http://jackgames.commonshostage.com/";
-    trace("Fetched "+url);
-    getURL(url);
-}
-
-_root.facebookButton.onRelease = function(){
-    var mess = getMessageFromScore();
-    var url="http://www.facebook.com/share.php?u=http://handsomejacks.co.uk/index.php/xmas-game";
-    trace("Fetched "+url);
-    getURL(url);
-}
-
 
 
 /***************************************************
@@ -159,7 +133,7 @@ function getMessageFromScore(){
     if(_root.piratesHappy<1){
         return "I just failed to impress any pirates in Handsome Jack's xmas game!  Can you do better?";
     }else if(_root.piratesHappy<8){
-        return "Woo!, I kept "+_root.piratesHappy+"/9 pirates happy in Handsome Jack's xmas game.  Can you do better?";
+        return "Woo!, I kept "+_root.piratesHappy+"/"+length(pirates)+" pirates happy in Handsome Jack's xmas game.  Can you do better?";
     }else{
         return "Woo! I rock! I impressed ALL the pirates in Handsome Jack's xmas game. Try and beat me!";
     }
@@ -171,7 +145,7 @@ function getMessageFromScore(){
 /**********************************************
 * Add a physics object to the world.
 */
-function addObject(name,x,y,z,dx,dy,dz,t,moveFunction,scale,collision){
+function addObject(name,faceDir,x,y,z,dx,dy,dz,t,moveFunction,scale,collision){
     var obj =_root.attachMovie(name,"object"+newLayer,newLayer);
     objects[numobjects++] = obj;
     obj.name=name+newLayer;
@@ -179,6 +153,7 @@ function addObject(name,x,y,z,dx,dy,dz,t,moveFunction,scale,collision){
     obj.x=x;
     obj.y=y;
     obj.z=z;
+    obj.faceDirection=faceDir;
     obj.dx=dx;
     obj.dy=dy;
     obj.dz=dz;
@@ -223,6 +198,38 @@ function setupPirate(self){
     self.piratePause=0;
 }
 
+
+
+/**********************************************
+* We build maps using this fake pirate move routine
+*/
+function newPirate(self){
+  if(Key.isDown(65)){  //A
+    self.x-=0.01;
+  }
+  if(Key.isDown(68)){  //D
+    self.x+=0.01;
+  }
+  if(Key.isDown(87)){   //W
+    self.y+=0.01;
+  }
+  if(Key.isDown(83)){  //S
+    self.y-=0.01;
+  }
+  if(Key.isDown(69)){  //E
+    self.moveFunction = movePirate;
+    setupPirate(self);
+    _root.canAdd = true;
+  }
+  if(Key.isDown(81)){  //Q
+    self.faceDirection+=1;
+    if(self.faceDirection>3){self.faceDirection=0;}
+  }
+  self.gotoAndStop(50*self.faceDirection+1);
+}
+
+
+
 /**********************************************
 * Pirate AI
 */
@@ -242,9 +249,9 @@ function movePirate(self){
         }
         if(self.throwBottle>0){
             if(self.throwBottle<7){
-                self.gotoAndStop(11+(self.throwBottle))
+                self.gotoAndStop(self.faceDirection*50+11+(self.throwBottle))
             }else if(self.throwBottle<13){
-                self.gotoAndStop(7-(self.throwBottle-7));
+                self.gotoAndStop(self.faceDirection*50+7-(self.throwBottle-7));
                 if(self.throwBottle==7){
                     self.hasBottle=false;
                     var b = throwBottle(self,Math.random()*0.01,Math.random()*0.01,0,0,0,0);
@@ -257,33 +264,33 @@ function movePirate(self){
         }else if(self.clapping>0){
             if(self.clapping<6){
                 //lifting hands up
-                self.gotoAndStop(18+self.clapping)
+                self.gotoAndStop(self.faceDirection*50+18+self.clapping)
             }else if(self.clapping<40){
                 if(self.clapping==6){
                     claps.start();
                 }
                 var f = self.clapping%6;
                 if(f<3){
-                    self.gotoAndStop(25+f)
+                    self.gotoAndStop(self.faceDirection*50+25+f)
                 }else{
-                    self.gotoAndStop(25+3-f)
+                    self.gotoAndStop(self.faceDirection*50+25+3-f)
                 }
             }else if(self.clapping<48){
+                self.gotoAndStop(self.faceDirection*50+27-(self.clapping-40))
                 if(gameEnded){
                     self.clapping=5;
                 }
-                self.gotoAndStop(27-(self.clapping-40))
             }else{
                 self.clapping=-1;
             }
             self.clapping++
         }else if(self.drinking>0){
           if(self.drinking<10){
-              self.gotoAndStop(7+int(self.drinking/2))
+              self.gotoAndStop(self.faceDirection*50+7+int(self.drinking/2))
           }else if(self.drinking<20){
-              self.gotoAndStop(11)
+              self.gotoAndStop(self.faceDirection*50+11)
           }else if(self.drinking<30){
-              self.gotoAndStop(11-(int((self.drinking-20)/2)))
+              self.gotoAndStop(self.faceDirection*50+11-(int((self.drinking-20)/2)))
           }else{
               if(self.drinkLeft--<=0){
                   self.throwBottle=1;
@@ -294,11 +301,11 @@ function movePirate(self){
                   }
               }
               self.drinking=-1;
-              self.gotoAndStop(7);
+              self.gotoAndStop(self.faceDirection*50+7);
           }
           self.drinking++;
         }else{
-            self.gotoAndStop(7);
+            self.gotoAndStop(self.faceDirection*50+7);
         }
         
         
@@ -306,12 +313,12 @@ function movePirate(self){
         //No Booze!
         if(self.anger++>200){
             self.happiness-=20;
-            self.gotoAndStop(int((self.anger%12)/2));
+            self.gotoAndStop(self.faceDirection*50+int((self.anger%12)/2));
             if(self.anger%12==0){
                 bashDesk.start();
             }
         }else{
-            self.gotoAndStop(2);
+            self.gotoAndStop(self.faceDirection*50+2);
         }
     }
     self.happiness+=1;
@@ -323,7 +330,7 @@ function movePirate(self){
 * Throw a bottle
 */
 function throwBottle(from,dx,dy,dz,offsetx,offsety,offsetz){
-    var b=addObject("Bottle",from.x+offsetx,from.y+offsety,from.z+offsetz,from.dx*3+dx,from.dy*3+dy,0.1+dz,30,moveBottle,20,false)
+    var b=addObject("Bottle",0,from.x+offsetx,from.y+offsety,from.z+offsetz,from.dx*3+dx,from.dy*3+dy,0.1+dz,30,moveBottle,20,false)
     b.bounced=0;
     b.empty=false;
     return b;   
@@ -380,7 +387,7 @@ function moveBottle(self){
 */
 function endGame(){
     _root.piratesHappy=0;
-    for(var n=0;n<9;n++){
+    for(var n=0;n<length(pirates);n++){
        var pirate = pirates[n];
        if(pirate.happiness>0){
            _root.piratesHappy++;
@@ -397,11 +404,55 @@ function endGame(){
     }else{
         userMessage("<b>Excellent!</b><br/><br/>You impressed ALL the pirates.<br/>Santa's movie is a hit!");
     }
-    _root.facebookButton._visible=true;
-    _root.tweetButton._visible=true;
+    this.fb._visible=true;
+    this.tb._visible=true;
+    this.db._visible=true;
+    trace("Loader "+this.fb+" send ShowButtons");
     _root.replayButton._visible=true;
-    _root.donateButton._visible=true;
     gameEnded=1;
+}
+
+
+/*************************************************
+* Set the functions for the link buttons
+*/
+function setButtons(f,t,d){
+  trace("Setting Button Functions "+f);
+  this.tb = t;
+  this.fb = f;
+  this.db = d;
+  if(gameEnded==false){
+    t._visible=false;
+    f._visible=false;
+    d._visible=false;
+  } 
+  
+  t.onRelease = function(){
+    var mess = getMessageFromScore();
+    var url="http://twitter.com/intent/tweet?text="+escape(mess+" - http://handsomejacks.co.uk/index.php/xmas-game");
+    trace("Fetched "+url);
+    getURL(url);
+    _parent._parent._parent.getURL(url);
+    _parent._parent.getURL(url);
+    _parent.getURL(url);
+    getURL(url);
+    _root.getURL(url);
+    _root._parent.getURL(url);
+  }
+
+  d.onRelease = function(){
+    var url="http://jackgames.commonshostage.com/";
+    trace("Fetched "+url);
+    getURL(url);
+    d._parent.getURL(url);
+  }
+
+  f.onRelease = function(){
+    var mess = getMessageFromScore();
+    var url="http://www.facebook.com/share.php?u=http://handsomejacks.co.uk/index.php/xmas-game";
+    trace("Fetched "+url);
+    f._parent.getURL(url);
+  }
 }
 
 
@@ -411,6 +462,22 @@ function endGame(){
 function moveSanta(self){
     if(Key.isDown(Key.END)){
         endGame();
+    }
+    if(Key.isDown(Key.INSERT)){
+      if(_root.canAdd){
+        _root.canAdd=false; //No more till that one's set.
+        pirates[np] = addObject("pirateAtSeat",1,0.6,0.6,0,0,0,0,-1,newPirate,50,true);
+        np++;
+      }
+    }
+    if(Key.isDown(Key.HOME)){
+      for(var n=0;n<np;n++){
+         var pirate = pirates[n];
+        trace('pirates[np] = addObject("PirateAtSeat",'+pirate.faceDirection+','+Math.round(pirate.x*100)/100+','+Math.round(pirate.y*100)/100+',0,0,0,0,-1,movePirate,50,true); setupPirate(pirates[np++]);');
+        trace("...");
+        trace("...");
+        trace("...");
+      }
     }
     //Move santa in the X dimention
     if (Key.isDown(Key.RIGHT)){
@@ -450,16 +517,16 @@ function moveSanta(self){
     if(absx>absy){
         //Left/Right - but which?
         if(self.dx<-0.001){
-            faceDirection = 1;  //left
+            self.faceDirection = 1;  //left
         }else if(self.dx>0.001){
-            faceDirection = 3;  //right
+            self.faceDirection = 3;  //right
         }
     }else{
         //Up/Down - but which?
         if(self.dy<-0.001){
-            faceDirection = 0;  //down
+            self.faceDirection = 0;  //down
         }else if(self.dy>0.001){
-            faceDirection = 2;  //up
+            self.faceDirection = 2;  //up
         }
     }
     
@@ -467,10 +534,10 @@ function moveSanta(self){
         //Throwing a bottle.
         if((absx+absy)>0.001){
             //Walk-throw
-            self.gotoAndPlay(faceDirection*50+throwFrames[throwFrame++]+7);
+            self.gotoAndPlay(self.faceDirection*50+throwFrames[throwFrame++]+7);
         }else{
             //Stand-throw
-            self.gotoAndPlay(faceDirection*50+throwFrames[throwFrame++]);
+            self.gotoAndPlay(self.faceDirection*50+throwFrames[throwFrame++]);
         }
         if(throwFrame>=throwFrames.length){
             throwFrame=-1;
@@ -481,7 +548,7 @@ function moveSanta(self){
             var offsetX=0;
             var offsetY=0;
             var offsetZ=0;
-            switch(faceDirection){
+            switch(self.faceDirection){
                 case 1:
                     offsetY+=0.01;
                     break;
@@ -506,10 +573,10 @@ function moveSanta(self){
             if(walkAnimFrame>walkAnimFrames.length){
                 walkAnimFrame=0;
             }
-            self.gotoAndStop(faceDirection*50+walkAnimFrames[walkAnimFrame]);
+            self.gotoAndStop(self.faceDirection*50+walkAnimFrames[walkAnimFrame]);
         }else{
             walkAnimFrame=0;
-            self.gotoAndStop(faceDirection*50+1);
+            self.gotoAndStop(self.faceDirection*50+1);
         }
     }
 
@@ -620,46 +687,41 @@ function collides(o){
 */
 function setup(){
   _root.replayButton.swapDepths(20000);
-  _root.facebookButton.swapDepths(20001);
-  _root.tweetButton.swapDepths(20002);
-  _root.donateButton.swapDepths(20003);
 
   for(var n=0;n<numobjects;n++){
     objects[n].removeMovieClip();
   }
   numobjects=0;
   userMessage("");
-  _root.facebookButton._visible=false;
-  _root.tweetButton._visible=false;
-  _root.donateButton._visible=false;
-  _root.replayButton._visible=false;
+  this.fb._visible=false;
+  this.tb._visible=false;
+  this.db._visible=false;
+  this.replayButton._visible=false;
   gameEnded=false;
   objects = new Array();
   numobjects=0;
   newLayer=100;
 
-  santa = addObject("Santa",0,1,0,0,0,0,-1,moveSanta,santaScale,true);
+  santa = addObject("Santa",0,0,1,0,0,0,0,-1,moveSanta,santaScale,true);
   santa._yscale=30;
   santa.loadFrames();
   pirates = new Array();
-  pirates[0] = addObject("PirateAtSeat",0.22,0.3,0,0,0,0,-1,movePirate,50,true);
-  setupPirate(pirates[0]);
-  pirates[1] = addObject("PirateAtSeat",0.44 ,0.3,0,0,0,0,-1,movePirate,50,true);
-  setupPirate(pirates[1]);
-  pirates[2] = addObject("PirateAtSeat",0.66,0.3,0,0,0,0,-1,movePirate,50,true);
-  setupPirate(pirates[2]);
-  pirates[3] = addObject("PirateAtSeat",0.22,0.55, 0,0,0,0,-1,movePirate,50,true);
-  setupPirate(pirates[3]);
-  pirates[4] = addObject("PirateAtSeat",0.44 ,0.55, 0,0,0,0,-1,movePirate,50,true);
-  setupPirate(pirates[4]);
-  pirates[5] = addObject("PirateAtSeat",0.66,0.55, 0,0,0,0,-1,movePirate,50,true);
-  setupPirate(pirates[5]);
-  pirates[6] = addObject("PirateAtSeat",0.22,0.80,0,0,0,0,-1,movePirate,50,true);
-  setupPirate(pirates[6]);
-  pirates[7] = addObject("PirateAtSeat",0.44 ,0.80,0,0,0,0,-1,movePirate,50,true);
-  setupPirate(pirates[7]);
-  pirates[8] = addObject("PirateAtSeat",0.0,0.80,0,0,0,0,-1,movePirate,50,true);
-  setupPirate(pirates[8]);
+  //Our lovely 'level editor' means we can hit HOME to print where the pirates are as a trace()
+  //then paste it in here. Add pirates with 'insert' when that's not commented out. Move 
+  //'em with ASDW and Q to turn, E to fix in place.
+pirates[np] = addObject("PirateAtSeat",0,0.39,0.25,0,0,0,0,-1,movePirate,50,true); setupPirate(pirates[np++]);
+pirates[np] = addObject("PirateAtSeat",0,0.49,0.22,0,0,0,0,-1,movePirate,50,true); setupPirate(pirates[np++]);
+pirates[np] = addObject("PirateAtSeat",3,0.01,0.81,0,0,0,0,-1,movePirate,50,true); setupPirate(pirates[np++]);
+pirates[np] = addObject("PirateAtSeat",3,0.03,0.72,0,0,0,0,-1,movePirate,50,true); setupPirate(pirates[np++]);
+pirates[np] = addObject("PirateAtSeat",1,0.47,0.76,0,0,0,0,-1,movePirate,50,true); setupPirate(pirates[np++]);
+pirates[np] = addObject("PirateAtSeat",1,0.4,0.77,0,0,0,0,-1,movePirate,50,true); setupPirate(pirates[np++]);
+pirates[np] = addObject("PirateAtSeat",0,0.44,0.68,0,0,0,0,-1,movePirate,50,true); setupPirate(pirates[np++]);
+pirates[np] = addObject("PirateAtSeat",0,0.53,0.66,0,0,0,0,-1,movePirate,50,true); setupPirate(pirates[np++]);
+pirates[np] = addObject("PirateAtSeat",3,0.36,0.52,0,0,0,0,-1,movePirate,50,true); setupPirate(pirates[np++]);
+pirates[np] = addObject("PirateAtSeat",2,0.47,0.47,0,0,0,0,-1,movePirate,50,true); setupPirate(pirates[np++]);
+pirates[np] = addObject("PirateAtSeat",2,0.56,0.71,0,0,0,0,-1,movePirate,50,true); setupPirate(pirates[np++]);
+pirates[np] = addObject("PirateAtSeat",1,0.14,0.88,0,0,0,0,-1,movePirate,50,true); setupPirate(pirates[np++]);
+
 
   //Restarting the clip crashes out if it's not loaded yet/
   if(startedAlready){
