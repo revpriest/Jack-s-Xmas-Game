@@ -1,3 +1,4 @@
+var debug=false;
 var screenWidth = 700;
 var screenHeight = 600;
 var maxspeed=0.01;
@@ -7,7 +8,7 @@ var santaScale=15;
 var pirateScale=60;
 var collisionDiameter = 0.08;
 
-var donationAmounts = [0,10,10,20];
+var donationAmounts = [-1,0,5,15,30];
 var musicUrls = ["","http://www.jamendo.com/en/album/56441","http://www.jamendo.com/en/album/81276","http://www.jamendo.com/en/album/81276","http://www.jamendo.com/en/album/56441"];
 var bandNames = ["","J.E.L.L.i","Anthony Viscounte","Anthony Viscounte","J.E.L.L.i"];
 var trackNames = ["","Frosty The Snowman","Santa Claus Is Coming To Town","Jingle Bells","Twelve Days Of Christmas"];
@@ -18,6 +19,11 @@ var trackNames = ["","Frosty The Snowman","Santa Claus Is Coming To Town","Jingl
 var score=0;
 _root.canAdd = true;
 var currentLevel=1;
+
+if(_root.startLevel!=null){
+  currentLevel=_root.startLevel;
+}
+
 var bottomLeftX = 484-1000;  var bottomLeftY = 540;
 var topLeftX=1328-1000;       var topLeftY=368;
 var bottomRightX = 1442-1000; var bottomRightY = 656;
@@ -50,15 +56,36 @@ var screenWidth_2 = screenWidth/2;  //Half the width of the screen
 var screenHeight_2 = screenHeight/2;    //Half the height of the screen
 
 
-/*********************************
-* Listen for the video to end
+//Make sure the buttons are WAY on top...
+_root.facebookButton.swapDepths(20001); 
+_root.tweetButton.swapDepths(20002); 
+_root.donateButton.swapDepths(20003);
+_root.replayButton.swapDepths(20000);
+
+
+/************************************************
+* Functions for link-buttons
 */
-var listenerObject:Object = new Object();
-listenerObject.complete = function(eventObject:Object):Void {
-    trace("Clip Ending");
-//    endGame();
-};
-_root.videoClip.addEventListener("complete", listenerObject);
+_root.tweetButton.onRelease = function(){
+  var mess = getMessageFromScore();
+  var url="http://twitter.com/intent/tweet?text="+escape(mess+" - http://dalliance.net/xmas2011/");
+  trace("Fetched "+url);
+  getURL(url);
+}
+_root.donateButton.onRelease = function(){
+  var url="http://xmasgame.commonshostage.com/";
+  trace("Fetched "+url);
+  getURL(url);
+}
+_root.facebookButton.onRelease = function(){
+  var mess = getMessageFromScore();
+  var url="http://www.facebook.com/share.php?u=http://dalliance.net/xmas2011/";
+  trace("Fetched "+url);
+  getURL(url);
+}
+
+
+
 
 
 _root.replayButton.onRelease = function(){
@@ -88,7 +115,7 @@ function userMessage(s){
     _root.userMessageShadow.htmlText = 
     _root.userMessageText.htmlText = "<p align=\"center\"><font size=\"30\">"+s+"</font>"+credits+"</p>";
 }
-var credits = "<font size=\"20\"><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>"+
+var credits = "<font size=\"20\"><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>"+
 "<br/><font size=\"30\"><b>Music</b></font>"+
 "<br/>"+trackNames[currentLevel]+" by "+bandNames[currentLevel]+
 "<br/><a href=\""+musicUrls[currentLevel]+"\">"+musicUrls[currentLevel]+"</a>"+
@@ -109,6 +136,12 @@ var credits = "<font size=\"20\"><br><br><br><br><br><br><br><br><br><br><br><br
 "<br/>Table and chair - Airkel"+
 "<br/><a href=\"http://opengameart.org/content/low-poly-furniture\">http://opengameart.org/content/low-poly-furniture</a>"+
 "<br/>"+
+"<br/>Christmas Tree: Yorik"+
+"<br/><a href=\"http://yorik.uncreated.net/greenhouse.html\">http://yorik.uncreated.net/greenhouse.html</a>"+
+"<br/>"+
+"<br/>Christmas Poster: Takako Timinago"+
+"<br/><a href=\"http://www.flickr.com/photos/coldfervor/3130239391/sizes/z/in/photostream/\">http://www.flickr.com/photos/coldfervor/3130239391/sizes/z/in/photostream/</a>"+
+"<br/>"+
 "<br/>Textures For Room - @rgs"+
 "<br/><a href=\"http://www.flickr.com/photos/rgarciasuarez74/232504935/sizes/o/in/photostream/\">http://www.flickr.com/photos/rgarciasuarez74/232504935/sizes/o/in/photostream/</a>"+
 "<br/>"+
@@ -122,6 +155,9 @@ var credits = "<font size=\"20\"><br><br><br><br><br><br><br><br><br><br><br><br
 "<br/>The entire work is licensed under the Creative Commons"+
 "<br/>Sharealike Attribute licence, 2011."+
 "<br/><a href=\"http://creativecommons.org/licenses/by-sa/2.5/\">http://creativecommons.org/licenses/by-sa/2.5/</a>"+
+"<br/>The game is GLP Free Open-Source Software."+
+"<br/>Find the source-code at Github:"+
+"<br/><a href=\"https://github.com/revpriest/Jack-s-Xmas-Game\">https://github.com/revpriest/Jack-s-Xmas-Game</a>"+
 "<br/>"+
 "<br/>This is a Commons Hostage project. It's released freely, "+
 "<br/>but levels 2 through 4 will only be released if our tip "+
@@ -390,8 +426,7 @@ function moveBottle(self){
 
 /*********************************************
 * Function to end the game. Called when the
-* clip finishes I guess. For now we cheat with
-* just presing "END"
+* clip finishes I guess.
 */
 function endGame(){
     _root.piratesHappy=0;
@@ -410,89 +445,49 @@ function endGame(){
     }else if(_root.piratesHappy<np){
         userMessage("<b>Well done!</b><br/><br/>You kept "+_root.piratesHappy+"/"+np+" pirates happy.");
     }else{
-        userMessage("<b>Excellent!</b><br/><br/>You impressed ALL "+np"+ of the pirates.");
+        userMessage("<b>Excellent!</b><br/><br/>You impressed ALL "+np+" of the pirates.");
     }
-    this.fb._visible=true;
-    this.tb._visible=true;
-    this.db._visible=true;
     if(currentLevel<4){
       this.replayButton.label = "Next Level";
     }else{
       this.replayButton.label = "Replay";
     }
-    trace("Loader "+this.fb+" send ShowButtons");
     _root.replayButton._visible=true;
+    _root.facebookButton._visible=true;
+    _root.tweetButton._visible=true;
+    _root.donateButton._visible=true;
     gameEnded=1;
 }
 
-
-/*************************************************
-* Set the functions for the link buttons
-*/
-function setButtons(f,t,d){
-  trace("Setting Button Functions "+f);
-  this.tb = t;
-  this.fb = f;
-  this.db = d;
-  if(gameEnded==false){
-    t._visible=false;
-    f._visible=false;
-    d._visible=false;
-  } 
-  
-  t.onRelease = function(){
-    var mess = getMessageFromScore();
-    var url="http://twitter.com/intent/tweet?text="+escape(mess+" - http://dalliance.net/xmas2011/");
-    trace("Fetched "+url);
-    getURL(url);
-    _parent._parent._parent.getURL(url);
-    _parent._parent.getURL(url);
-    _parent.getURL(url);
-    getURL(url);
-    _root.getURL(url);
-    _root._parent.getURL(url);
-  }
-
-  d.onRelease = function(){
-    var url="http://dalliance.net/xmas2011/";
-    trace("Fetched "+url);
-    getURL(url);
-    d._parent.getURL(url);
-  }
-
-  f.onRelease = function(){
-    var mess = getMessageFromScore();
-    var url="http://www.facebook.com/share.php?u=http://dalliance.net/xmas2011/";
-    trace("Fetched "+url);
-    f._parent.getURL(url);
-  }
-}
 
 
 /**********************************************
 * Player Movement
 */
 function moveSanta(self){
-    if(Key.isDown(Key.END)){
-        endGame();
-    }
-    if(Key.isDown(Key.INSERT)){
-      if(_root.canAdd){
-        _root.canAdd=false; //No more till that one's set.
-        pirates[np] = addObject("pirateAtSeat",1,0.6,0.6,0,0,0,0,-1,newPirate,pirateScale,true);
-        np++;
+    if(debug){
+      if(Key.isDown(Key.END)){
+            endGame();
+      }
+      if(Key.isDown(Key.INSERT)){
+        if(_root.canAdd){
+          _root.canAdd=false; //No more till that one's set.
+          pirates[np] = addObject("pirateAtSeat",1,0.6,0.6,0,0,0,0,-1,newPirate,pirateScale,true);
+          np++;
+        }
+      }
+      if(Key.isDown(Key.PGUP)){
+        setup("NoPirates");
+      }
+      if(Key.isDown(Key.HOME)){
+        for(var n=0;n<np;n++){
+           var pirate = pirates[n];
+          trace('      pirates[np] = addObject("PirateAtSeat",'+pirate.faceDirection+','+Math.round(pirate.x*100)/100+','+Math.round(pirate.y*100)/100+',0,0,0,0,-1,movePirate,pirateScale,true); setupPirate(pirates[np++]);');
+        }
+        trace("...");
       }
     }
-    if(Key.isDown(Key.PGUP)){
-      setup("NoPirates");
-    }
-    if(Key.isDown(Key.HOME)){
-      for(var n=0;n<np;n++){
-         var pirate = pirates[n];
-        trace('      pirates[np] = addObject("PirateAtSeat",'+pirate.faceDirection+','+Math.round(pirate.x*100)/100+','+Math.round(pirate.y*100)/100+',0,0,0,0,-1,movePirate,pirateScale,true); setupPirate(pirates[np++]);');
-      }
-      trace("...");
-    }
+
     //Move santa in the X dimention
     if (Key.isDown(Key.RIGHT)){
       self.dx+=acceleration;
@@ -701,7 +696,11 @@ function collides(o){
 */
 function setup(x){
   np=0;
-  _root.replayButton.swapDepths(20000);
+  //Make the link buttons invisible till later
+  _root.facebookButton._visible=false;
+  _root.tweetButton._visible=false;
+  _root.replayButton._visible=false;
+  _root.donateButton._visible=false;
 
   for(var n=0;n<numobjects;n++){
     objects[n].removeMovieClip();
@@ -788,15 +787,8 @@ function setup(x){
   netStream = new NetStream(netConn);    
   netStream.onStatus = onNetStatus;                                                                   
   _root.videoClip.attachVideo(netStream);
-
   netStream.play("level"+currentLevel+".flv");
 
-  //Restarting the clip crashes out if it's not loaded yet/
-  if(startedAlready){
-//    _root.videoClip.play();
-  }else{
-      startedAlready=true;
-  }
 }
 setup();
 
@@ -807,6 +799,13 @@ setup();
 function onNetStatus(e) {
   if(e.code == "NetStream.Play.StreamNotFound"){
     levelNotYetFree();
+  }else if(e.code == "NetStream.Play.Stop"){
+    trace("Clip Ending");
+    if(!debug){
+      endGame();
+    }
+  }else{
+    trace("NetStatusCode:"+e.code);
   }
 }
 
@@ -821,11 +820,14 @@ function levelNotYetFree(){
     objects[n].removeMovieClip();
   }
   numobjects=0;
-  userMessage("<b>Level Not Yet Free</b><br/><br/>The next level will be released when our tip jar gets another "+donationAmounts[currentLevel]+" pounds!<br/><br/>It features "+bandNames[currentLevel]+" playing "+trackNames[currentLevel]+" and even more pirates! If you won't donate, consider spreading the word so that others will<br/><br/><font size=\"30\"><a href=\"http://xmasgame.commonshostage.com/\">[CLICK HERE TO DONATE]</a></font>");
+  userMessage("<b>Level Not Yet Free</b><br/><br/>The next level will be released when our tip jar gets another "+donationAmounts[currentLevel]+" pounds!<br/><br/>It features "+bandNames[currentLevel]+" playing "+trackNames[currentLevel]+" and even more pirates! If you won't donate, consider spreading the word so that others will");
   userMessagePause = 10000000;
   currentLevel=0;
   this.replayButton.label = "Replay";
   _root.replayButton._visible=true;
+  _root.facebookButton._visible=true;
+  _root.tweetButton._visible=true;
+  _root.donateButton._visible=true;
 }
 
 
@@ -874,9 +876,16 @@ _root.onEnterFrame = function(){
 
     //We totted up the score during the movement...
     if(!gameEnded){
-        score = "Music: <a href=\""+musicUrls[currentLevel]+"\">"+trackNames[currentLevel]+" by "+bandNames[currentLevel]+"</a><br/><font size=\"25\">Score: "+score+"</font>";
-        _root.userScore.htmlText=score;
-        _root.userScoreShadow.htmlText=score;
+        var scoreText = "Music: <a href=\""+musicUrls[currentLevel]+"\">"+trackNames[currentLevel]+" by "+bandNames[currentLevel]+"</a><br/><font size=\"25\">Score: ";
+        if(score<0){
+          trace("NegScore");
+          scoreText+="<font color=\"#ff0000\">"+score+"</font>";
+        }else{
+          scoreText+=score;
+        }
+        scoreText+="</font>";
+        _root.userScore.htmlText=scoreText;
+        _root.userScoreShadow.htmlText=scoreText;
     }
 
 
