@@ -3,17 +3,24 @@ var screenHeight = 600;
 var maxspeed=0.01;
 var acceleration=0.001;
 var deceleration=0.9;
-var santaScale=20;
-var collisionDiameter = 0.078;
-var score=0;
-_root.canAdd = true;
+var santaScale=15;
+var pirateScale=60;
+var collisionDiameter = 0.08;
+
+var donationAmounts = [0,10,10,20];
+var musicUrls = ["","http://www.jamendo.com/en/album/56441","http://www.jamendo.com/en/album/81276","http://www.jamendo.com/en/album/81276","http://www.jamendo.com/en/album/56441"];
+var bandNames = ["","J.E.L.L.i","Anthony Viscounte","Anthony Viscounte","J.E.L.L.i"];
+var trackNames = ["","Frosty The Snowman","Santa Claus Is Coming To Town","Jingle Bells","Twelve Days Of Christmas"];
 
 //We define the coordinates of the geometric display.
 //and work out the slope of the lines.
 //419 198
-var bottomLeftX = 0-500;  var bottomLeftY = 554;
-var topLeftX=910-500;       var topLeftY=350;
-var bottomRightX = 890-500; var bottomRightY = 662;
+var score=0;
+_root.canAdd = true;
+var currentLevel=1;
+var bottomLeftX = 484-1000;  var bottomLeftY = 540;
+var topLeftX=1328-1000;       var topLeftY=368;
+var bottomRightX = 1442-1000; var bottomRightY = 656;
 var leftLinedx = topLeftX-bottomLeftX;
 var leftLinedy = topLeftY-bottomLeftY;
 var bottomLinedx = bottomRightX-bottomLeftX;
@@ -56,6 +63,11 @@ _root.videoClip.addEventListener("complete", listenerObject);
 
 _root.replayButton.onRelease = function(){
     trace("Replay");
+    if(currentLevel>=4){
+      currentLevel=1;
+    }else{
+      currentLevel++;
+    }
     setup();
 }
 
@@ -77,16 +89,9 @@ function userMessage(s){
     _root.userMessageText.htmlText = "<p align=\"center\"><font size=\"30\">"+s+"</font>"+credits+"</p>";
 }
 var credits = "<font size=\"20\"><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>"+
-"<br/><font size=\"30\"><b>Handsome Jack's Showband</b></font>"+
-"<br/>Vocals And Guitar - Adam"+
-"<br/>Lead Guitar - Paul"+
-"<br/>Bass - Andi"+
-"<br/>Drums - Dom"+
-"<br/>Special Guest Vocals - Sammy"+
-"<br/><a href=\"http://handsomejacks.co.uk/\">http://handsomejacks.co.uk/</a>"+
-"<br/>"+
-"<br/>Covering a song by The Pogues"+
-"<br/><a href=\"http://pogues.com/\">http://pogues.com/</a>"+
+"<br/><font size=\"30\"><b>Music</b></font>"+
+"<br/>"+trackNames[currentLevel]+" by "+bandNames[currentLevel]+
+"<br/><a href=\""+musicUrls[currentLevel]+"\">"+musicUrls[currentLevel]+"</a>"+
 "<br/>"+
 "<br/><font size=\"30\"><b>Game</b></font>"+
 "<br/>Programming - Adam Priest"+
@@ -104,8 +109,8 @@ var credits = "<font size=\"20\"><br><br><br><br><br><br><br><br><br><br><br><br
 "<br/>Table and chair - Airkel"+
 "<br/><a href=\"http://opengameart.org/content/low-poly-furniture\">http://opengameart.org/content/low-poly-furniture</a>"+
 "<br/>"+
-"<br/>Room - Rui Teixeira"+
-"<br/><a href=\"http://blender.ruijst.com/2011/04/24/realistic-interior-scene-bedroom-update2/\">http://blender.ruijst.com/2011/04/24/realistic-interior-scene-bedroom-update2/</a>"+
+"<br/>Textures For Room - @rgs"+
+"<br/><a href=\"http://www.flickr.com/photos/rgarciasuarez74/232504935/sizes/o/in/photostream/\">http://www.flickr.com/photos/rgarciasuarez74/232504935/sizes/o/in/photostream/</a>"+
 "<br/>"+
 "<br/>Bottle Shatter Sound - Mike Koenig"+
 "<br/><a href=\"http://soundbible.com/105-Light-Bulb-Breaking.html\">http://soundbible.com/105-Light-Bulb-Breaking.html</a>"+
@@ -118,11 +123,10 @@ var credits = "<font size=\"20\"><br><br><br><br><br><br><br><br><br><br><br><br
 "<br/>Sharealike Attribute licence, 2011."+
 "<br/><a href=\"http://creativecommons.org/licenses/by-sa/2.5/\">http://creativecommons.org/licenses/by-sa/2.5/</a>"+
 "<br/>"+
-"<br/>This is a Commons Hostage project for Handsome Jack's"+
-"<br/>Showband. It's released freely, we'll do more similar"+
-"<br/>stuff if our tip-jar goes high enough."+
-"<br/>Click 'Donate' to see the fundraising page."+
-"<br/><a href=\"http//jackgames.commonshostage.com/\">http//jackgames.commonshostage.com/</a>"+
+"<br/>This is a Commons Hostage project. It's released freely, "+
+"<br/>but levels 2 through 4 will only be released if our tip "+
+"<br/>jar goes high enough. Click 'Donate' to see the fundraising page"+
+"<br/><a href=\"http//xmasgame.commonshostage.com/\">http//xmasgame.commonshostage.com/</a>"+
 "</font>";
 
 
@@ -131,11 +135,11 @@ var credits = "<font size=\"20\"><br><br><br><br><br><br><br><br><br><br><br><br
 */
 function getMessageFromScore(){
     if(_root.piratesHappy<1){
-        return "I just failed to impress any pirates in Handsome Jack's xmas game!  Can you do better?";
-    }else if(_root.piratesHappy<8){
-        return "Woo!, I kept "+_root.piratesHappy+"/"+length(pirates)+" pirates happy in Handsome Jack's xmas game.  Can you do better?";
+        return "I just failed to impress any pirates in Santa's Drinking Pirate game!  Can you do better?";
+    }else if(_root.piratesHappy<np){
+        return "Woo!, I kept "+_root.piratesHappy+"/"+np+" pirates happy in Santa's Drinking Pirate game.  Can you do better?";
     }else{
-        return "Woo! I rock! I impressed ALL the pirates in Handsome Jack's xmas game. Try and beat me!";
+        return "Woo! I rock! I impressed ALL the pirates in Santa's Drinking Pirate game. Try and beat me!";
     }
 }
 
@@ -206,15 +210,19 @@ function setupPirate(self){
 function newPirate(self){
   if(Key.isDown(65)){  //A
     self.x-=0.01;
+    if(self.x<0){self.x=0;}
   }
   if(Key.isDown(68)){  //D
     self.x+=0.01;
+    if(self.x>1){self.x=1;}
   }
   if(Key.isDown(87)){   //W
     self.y+=0.01;
+    if(self.y>1){self.y=1;}
   }
   if(Key.isDown(83)){  //S
     self.y-=0.01;
+    if(self.y<0){self.y=0;}
   }
   if(Key.isDown(69)){  //E
     self.moveFunction = movePirate;
@@ -398,15 +406,20 @@ function endGame(){
        }
     }
     if(_root.piratesHappy<1){
-        userMessage("<b>Oh No!</b><br/><br/>You failed to impress any pirates.<br/>All of them hate Santa's new video.");
-    }else if(_root.piratesHappy<8){
-        userMessage("<b>Well done!</b><br/><br/>You kept "+_root.piratesHappy+" pirates happy.<br/>They love santa's movie!");
+        userMessage("<b>Oh No!</b><br/><br/>You failed to impress any pirates.");
+    }else if(_root.piratesHappy<np){
+        userMessage("<b>Well done!</b><br/><br/>You kept "+_root.piratesHappy+"/"+np+" pirates happy.");
     }else{
-        userMessage("<b>Excellent!</b><br/><br/>You impressed ALL the pirates.<br/>Santa's movie is a hit!");
+        userMessage("<b>Excellent!</b><br/><br/>You impressed ALL "+np"+ of the pirates.");
     }
     this.fb._visible=true;
     this.tb._visible=true;
     this.db._visible=true;
+    if(currentLevel<4){
+      this.replayButton.label = "Next Level";
+    }else{
+      this.replayButton.label = "Replay";
+    }
     trace("Loader "+this.fb+" send ShowButtons");
     _root.replayButton._visible=true;
     gameEnded=1;
@@ -429,7 +442,7 @@ function setButtons(f,t,d){
   
   t.onRelease = function(){
     var mess = getMessageFromScore();
-    var url="http://twitter.com/intent/tweet?text="+escape(mess+" - http://handsomejacks.co.uk/index.php/xmas-game");
+    var url="http://twitter.com/intent/tweet?text="+escape(mess+" - http://dalliance.net/xmas2011/");
     trace("Fetched "+url);
     getURL(url);
     _parent._parent._parent.getURL(url);
@@ -441,7 +454,7 @@ function setButtons(f,t,d){
   }
 
   d.onRelease = function(){
-    var url="http://jackgames.commonshostage.com/";
+    var url="http://dalliance.net/xmas2011/";
     trace("Fetched "+url);
     getURL(url);
     d._parent.getURL(url);
@@ -449,7 +462,7 @@ function setButtons(f,t,d){
 
   f.onRelease = function(){
     var mess = getMessageFromScore();
-    var url="http://www.facebook.com/share.php?u=http://handsomejacks.co.uk/index.php/xmas-game";
+    var url="http://www.facebook.com/share.php?u=http://dalliance.net/xmas2011/";
     trace("Fetched "+url);
     f._parent.getURL(url);
   }
@@ -466,18 +479,19 @@ function moveSanta(self){
     if(Key.isDown(Key.INSERT)){
       if(_root.canAdd){
         _root.canAdd=false; //No more till that one's set.
-        pirates[np] = addObject("pirateAtSeat",1,0.6,0.6,0,0,0,0,-1,newPirate,50,true);
+        pirates[np] = addObject("pirateAtSeat",1,0.6,0.6,0,0,0,0,-1,newPirate,pirateScale,true);
         np++;
       }
+    }
+    if(Key.isDown(Key.PGUP)){
+      setup("NoPirates");
     }
     if(Key.isDown(Key.HOME)){
       for(var n=0;n<np;n++){
          var pirate = pirates[n];
-        trace('pirates[np] = addObject("PirateAtSeat",'+pirate.faceDirection+','+Math.round(pirate.x*100)/100+','+Math.round(pirate.y*100)/100+',0,0,0,0,-1,movePirate,50,true); setupPirate(pirates[np++]);');
-        trace("...");
-        trace("...");
-        trace("...");
+        trace('      pirates[np] = addObject("PirateAtSeat",'+pirate.faceDirection+','+Math.round(pirate.x*100)/100+','+Math.round(pirate.y*100)/100+',0,0,0,0,-1,movePirate,pirateScale,true); setupPirate(pirates[np++]);');
       }
+      trace("...");
     }
     //Move santa in the X dimention
     if (Key.isDown(Key.RIGHT)){
@@ -592,7 +606,7 @@ function moveSanta(self){
 function sortLayersByDepth(objects){
     for(var n=0;n<numobjects;n++){
         var obj=objects[n];
-        obj.depth = -(obj.x+100*obj.y);
+        obj.depth = -(-obj.x+100*obj.y);
     }
     var swapped=true;
     while(swapped){
@@ -685,7 +699,8 @@ function collides(o){
 /*********************************************
 * Set up
 */
-function setup(){
+function setup(x){
+  np=0;
   _root.replayButton.swapDepths(20000);
 
   for(var n=0;n<numobjects;n++){
@@ -702,35 +717,117 @@ function setup(){
   numobjects=0;
   newLayer=100;
 
-  santa = addObject("Santa",0,0,1,0,0,0,0,-1,moveSanta,santaScale,true);
-  santa._yscale=30;
   santa.loadFrames();
   pirates = new Array();
   //Our lovely 'level editor' means we can hit HOME to print where the pirates are as a trace()
   //then paste it in here. Add pirates with 'insert' when that's not commented out. Move 
   //'em with ASDW and Q to turn, E to fix in place.
-pirates[np] = addObject("PirateAtSeat",0,0.39,0.25,0,0,0,0,-1,movePirate,50,true); setupPirate(pirates[np++]);
-pirates[np] = addObject("PirateAtSeat",0,0.49,0.22,0,0,0,0,-1,movePirate,50,true); setupPirate(pirates[np++]);
-pirates[np] = addObject("PirateAtSeat",3,0.01,0.81,0,0,0,0,-1,movePirate,50,true); setupPirate(pirates[np++]);
-pirates[np] = addObject("PirateAtSeat",3,0.03,0.72,0,0,0,0,-1,movePirate,50,true); setupPirate(pirates[np++]);
-pirates[np] = addObject("PirateAtSeat",1,0.47,0.76,0,0,0,0,-1,movePirate,50,true); setupPirate(pirates[np++]);
-pirates[np] = addObject("PirateAtSeat",1,0.4,0.77,0,0,0,0,-1,movePirate,50,true); setupPirate(pirates[np++]);
-pirates[np] = addObject("PirateAtSeat",0,0.44,0.68,0,0,0,0,-1,movePirate,50,true); setupPirate(pirates[np++]);
-pirates[np] = addObject("PirateAtSeat",0,0.53,0.66,0,0,0,0,-1,movePirate,50,true); setupPirate(pirates[np++]);
-pirates[np] = addObject("PirateAtSeat",3,0.36,0.52,0,0,0,0,-1,movePirate,50,true); setupPirate(pirates[np++]);
-pirates[np] = addObject("PirateAtSeat",2,0.47,0.47,0,0,0,0,-1,movePirate,50,true); setupPirate(pirates[np++]);
-pirates[np] = addObject("PirateAtSeat",2,0.56,0.71,0,0,0,0,-1,movePirate,50,true); setupPirate(pirates[np++]);
-pirates[np] = addObject("PirateAtSeat",1,0.14,0.88,0,0,0,0,-1,movePirate,50,true); setupPirate(pirates[np++]);
+  if(x==null){
 
+    if(currentLevel==1){
+      santa = addObject("Santa",0,0,1,0,0,0,0,-1,moveSanta,santaScale,true);
+      santa._yscale=santaScale*2;
+      pirates[np] = addObject("PirateAtSeat",1,0.31,0.76,0,0,0,0,-1,movePirate,pirateScale,true); setupPirate(pirates[np++]);
+      pirates[np] = addObject("PirateAtSeat",3,0.22,0.77,0,0,0,0,-1,movePirate,pirateScale,true); setupPirate(pirates[np++]);
+      pirates[np] = addObject("PirateAtSeat",0,0.27,0.66,0,0,0,0,-1,movePirate,pirateScale,true); setupPirate(pirates[np++]);
+      pirates[np] = addObject("PirateAtSeat",2,0.39,0.66,0,0,0,0,-1,movePirate,pirateScale,true); setupPirate(pirates[np++]);
+      pirates[np] = addObject("PirateAtSeat",0,0.39,0.31,0,0,0,0,-1,movePirate,pirateScale,true); setupPirate(pirates[np++]);
+      pirates[np] = addObject("PirateAtSeat",2,0.7,0.49,0,0,0,0,-1,movePirate,pirateScale,true); setupPirate(pirates[np++]);
+    }else if(currentLevel==2){
+      santa = addObject("Santa",0,0.2,0.8,0,0,0,0,-1,moveSanta,santaScale,true);
+      santa._yscale=santaScale*2;
+      pirates[np] = addObject("PirateAtSeat",1,0.16,0.91,0,0,0,0,-1,movePirate,pirateScale,true); setupPirate(pirates[np++]);
+      pirates[np] = addObject("PirateAtSeat",1,0.27,0.9,0,0,0,0,-1,movePirate,pirateScale,true); setupPirate(pirates[np++]);
+      pirates[np] = addObject("PirateAtSeat",1,0.37,0.89,0,0,0,0,-1,movePirate,pirateScale,true); setupPirate(pirates[np++]);
+      pirates[np] = addObject("PirateAtSeat",3,0.08,0.83,0,0,0,0,-1,movePirate,pirateScale,true); setupPirate(pirates[np++]);
+      pirates[np] = addObject("PirateAtSeat",3,0.09,0.7,0,0,0,0,-1,movePirate,pirateScale,true); setupPirate(pirates[np++]);
+      pirates[np] = addObject("PirateAtSeat",3,0.21,0.47,0,0,0,0,-1,movePirate,pirateScale,true); setupPirate(pirates[np++]);
+      pirates[np] = addObject("PirateAtSeat",0,0.38,0.31,0,0,0,0,-1,movePirate,pirateScale,true); setupPirate(pirates[np++]);
+      pirates[np] = addObject("PirateAtSeat",0,0.51,0.28,0,0,0,0,-1,movePirate,pirateScale,true); setupPirate(pirates[np++]);
+      pirates[np] = addObject("PirateAtSeat",2,0.58,0.69,0,0,0,0,-1,movePirate,pirateScale,true); setupPirate(pirates[np++]);
+      pirates[np] = addObject("PirateAtSeat",2,0.68,0.49,0,0,0,0,-1,movePirate,pirateScale,true); setupPirate(pirates[np++]);
+      pirates[np] = addObject("PirateAtSeat",0,0.64,0.32,0,0,0,0,-1,movePirate,pirateScale,true); setupPirate(pirates[np++]);
+    }else if(currentLevel==3){
+      santa = addObject("Santa",0,0.2,0.8,0,0,0,0,-1,moveSanta,santaScale,true);
+      santa._yscale=santaScale*2;
+      pirates[np] = addObject("PirateAtSeat",3,0.17,0.51,0,0,0,0,-1,movePirate,pirateScale,true); setupPirate(pirates[np++]);
+      pirates[np] = addObject("PirateAtSeat",1,0.17,0.54,0,0,0,0,-1,movePirate,pirateScale,true); setupPirate(pirates[np++]);
+      pirates[np] = addObject("PirateAtSeat",1,0.43,0.78,0,0,0,0,-1,movePirate,pirateScale,true); setupPirate(pirates[np++]);
+      pirates[np] = addObject("PirateAtSeat",1,0.51,0.77,0,0,0,0,-1,movePirate,pirateScale,true); setupPirate(pirates[np++]);
+      pirates[np] = addObject("PirateAtSeat",0,0.54,0.66,0,0,0,0,-1,movePirate,pirateScale,true); setupPirate(pirates[np++]);
+      pirates[np] = addObject("PirateAtSeat",0,0.46,0.67,0,0,0,0,-1,movePirate,pirateScale,true); setupPirate(pirates[np++]);
+      pirates[np] = addObject("PirateAtSeat",1,0.25,0.72,0,0,0,0,-1,movePirate,pirateScale,true); setupPirate(pirates[np++]);
+      pirates[np] = addObject("PirateAtSeat",0,0.26,0.67,0,0,0,0,-1,movePirate,pirateScale,true); setupPirate(pirates[np++]);
+      pirates[np] = addObject("PirateAtSeat",0,0.51,0.21,0,0,0,0,-1,movePirate,pirateScale,true); setupPirate(pirates[np++]);
+      pirates[np] = addObject("PirateAtSeat",0,0.6,0.18,0,0,0,0,-1,movePirate,pirateScale,true); setupPirate(pirates[np++]);
+      pirates[np] = addObject("PirateAtSeat",1,0.55,0.24,0,0,0,0,-1,movePirate,pirateScale,true); setupPirate(pirates[np++]);
+    }else if(currentLevel==4){
+      santa = addObject("Santa",0,0.2,0.8,0,0,0,0,-1,moveSanta,santaScale,true);
+      santa._yscale=santaScale*2;
+      pirates[np] = addObject("PirateAtSeat",3,0.3,0.38,0,0,0,0,-1,movePirate,pirateScale,true); setupPirate(pirates[np++]);
+      pirates[np] = addObject("PirateAtSeat",1,0.32,0.38,0,0,0,0,-1,movePirate,pirateScale,true); setupPirate(pirates[np++]);
+      pirates[np] = addObject("PirateAtSeat",2,0.37,0.35,0,0,0,0,-1,movePirate,pirateScale,true); setupPirate(pirates[np++]);
+      pirates[np] = addObject("PirateAtSeat",0,0.58,0.29,0,0,0,0,-1,movePirate,pirateScale,true); setupPirate(pirates[np++]);
+      pirates[np] = addObject("PirateAtSeat",2,0.69,0.29,0,0,0,0,-1,movePirate,pirateScale,true); setupPirate(pirates[np++]);
+      pirates[np] = addObject("PirateAtSeat",1,0.59,0.39,0,0,0,0,-1,movePirate,pirateScale,true); setupPirate(pirates[np++]);
+      pirates[np] = addObject("PirateAtSeat",1,0.06,0.93,0,0,0,0,-1,movePirate,pirateScale,true); setupPirate(pirates[np++]);
+      pirates[np] = addObject("PirateAtSeat",0,0.06,0.88,0,0,0,0,-1,movePirate,pirateScale,true); setupPirate(pirates[np++]);
+      pirates[np] = addObject("PirateAtSeat",1,0.35,0.85,0,0,0,0,-1,movePirate,pirateScale,true); setupPirate(pirates[np++]);
+      pirates[np] = addObject("PirateAtSeat",2,0.46,0.78,0,0,0,0,-1,movePirate,pirateScale,true); setupPirate(pirates[np++]);
+      pirates[np] = addObject("PirateAtSeat",3,0.35,0.78,0,0,0,0,-1,movePirate,pirateScale,true); setupPirate(pirates[np++]);
+      pirates[np] = addObject("PirateAtSeat",2,0.76,0.48,0,0,0,0,-1,movePirate,pirateScale,true); setupPirate(pirates[np++]);
+      pirates[np] = addObject("PirateAtSeat",3,0.7,0.48,0,0,0,0,-1,movePirate,pirateScale,true); setupPirate(pirates[np++]);
+      pirates[np] = addObject("PirateAtSeat",0,0.3,0.6,0,0,0,0,-1,movePirate,pirateScale,true); setupPirate(pirates[np++]);
+      pirates[np] = addObject("PirateAtSeat",1,0.3,0.64,0,0,0,0,-1,movePirate,pirateScale,true); setupPirate(pirates[np++]);
+    }
+  }
+
+  // Create a NetConnection object
+  netConn = new NetConnection();
+  netConn.connect(null);
+  netStream = new NetStream(netConn);    
+  netStream.onStatus = onNetStatus;                                                                   
+  _root.videoClip.attachVideo(netStream);
+
+  netStream.play("level"+currentLevel+".flv");
 
   //Restarting the clip crashes out if it's not loaded yet/
   if(startedAlready){
-    _root.videoClip.play();
+//    _root.videoClip.play();
   }else{
       startedAlready=true;
   }
 }
 setup();
+
+
+/***************************************************
+* What do we get from netStatus?
+*/
+function onNetStatus(e) {
+  if(e.code == "NetStream.Play.StreamNotFound"){
+    levelNotYetFree();
+  }
+}
+
+
+/*************************************************
+* What do we do when the level isn't yet free? There's
+* no uploaded music for it or anything.
+*/
+function levelNotYetFree(){
+  gameEnded=true;
+  for(var n=0;n<numobjects;n++){
+    objects[n].removeMovieClip();
+  }
+  numobjects=0;
+  userMessage("<b>Level Not Yet Free</b><br/><br/>The next level will be released when our tip jar gets another "+donationAmounts[currentLevel]+" pounds!<br/><br/>It features "+bandNames[currentLevel]+" playing "+trackNames[currentLevel]+" and even more pirates! If you won't donate, consider spreading the word so that others will<br/><br/><font size=\"30\"><a href=\"http://xmasgame.commonshostage.com/\">[CLICK HERE TO DONATE]</a></font>");
+  userMessagePause = 10000000;
+  currentLevel=0;
+  this.replayButton.label = "Replay";
+  _root.replayButton._visible=true;
+}
+
 
 
 /*********************************************
@@ -777,7 +874,7 @@ _root.onEnterFrame = function(){
 
     //We totted up the score during the movement...
     if(!gameEnded){
-        score = "<font size=\"25\">Score: "+score+"</font>";
+        score = "Music: <a href=\""+musicUrls[currentLevel]+"\">"+trackNames[currentLevel]+" by "+bandNames[currentLevel]+"</a><br/><font size=\"25\">Score: "+score+"</font>";
         _root.userScore.htmlText=score;
         _root.userScoreShadow.htmlText=score;
     }
