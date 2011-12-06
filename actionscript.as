@@ -171,11 +171,11 @@ var credits = "<font size=\"20\"><br><br><br><br><br><br><br><br><br><br><br><br
 */
 function getMessageFromScore(){
     if(_root.piratesHappy<1){
-        return "I just failed to impress any pirates in Santa's Drinking Pirate game!  Can you do better?";
+        return "I just failed to impress any pirates in Santa's Pirate Drinking game!  Can you do better?";
     }else if(_root.piratesHappy<np){
-        return "Woo!, I kept "+_root.piratesHappy+"/"+np+" pirates happy in Santa's Drinking Pirate game.  Can you do better?";
+        return "Woo!, I kept "+_root.piratesHappy+"/"+np+" pirates happy in Santa's Pirate Drinking game.  Can you do better?";
     }else{
-        return "Woo! I rock! I impressed ALL the pirates in Santa's Drinking Pirate game. Try and beat me!";
+        return "Woo! I rock! I impressed ALL the pirates in Santa's Pirate Drinking game. Try and beat me!";
     }
 }
 
@@ -356,7 +356,7 @@ function movePirate(self){
     }else{
         //No Booze!
         if(self.anger++>200){
-            self.happiness-=20;
+            self.happiness-=5;
             self.gotoAndStop(self.faceDirection*50+int((self.anger%12)/2));
             if(self.anger%12==0){
                 bashDesk.start();
@@ -399,7 +399,7 @@ function moveBottle(self){
                         obj.hasBottle=true;
                         obj.thirst=int(Math.random()*300);
                         obj.drinking=0;
-                        self.anger=0;
+                        obj.anger=0;
                         obj.drinkLeft=3;
                         obj.throwBottle=0;
                         self.time=1;
@@ -630,26 +630,37 @@ function sortLayersByDepth(objects){
 * Move the first object so it's just touching
 * the edge of the second object. Which is what
 * happens when you collide with it of course.
+* EDIT: We now take an ARRAY FULL of objects
+* to find the right place given the collision
+* with all of 'em rather than just one.
+*
+* Well, actually, no time for all that. We'll
+* continue to work it out properly if there's
+* just one object collision, but if there's
+* more than one screw it, just refuse to move.
 */
-function moveToEdge(mover,edge){
-    var newX = (mover.x+mover.dx)
-    var newY = (mover.y+mover.dy)
-    var dx = newX-edge.x;
-    var dy = newY-edge.y;
-    var l = Math.sqrt(dx*dx+dy*dy);
-    var sinalpha = Math.abs(dy)/l;
-    var alpha = Math.asin(sinalpha);
-    var nx = Math.cos(alpha)*collisionDiameter;
-    var ny = Math.sin(alpha)*collisionDiameter;
-    if(dx<0){
-        mover.x=edge.x-nx;
-    }else{
-        mover.x=edge.x+nx;
-    }
-    if(dy<0){
-        mover.y=edge.y-ny;
-    }else{
-        mover.y=edge.y+ny;
+function moveToEdge(mover,objs){
+    if(objs.length==1){
+      var edge = objs[0];
+      var newX = (mover.x+mover.dx)
+      var newY = (mover.y+mover.dy)
+      var dx = newX-edge.x;
+      var dy = newY-edge.y;
+      var l = Math.sqrt(dx*dx+dy*dy);
+      var sinalpha = Math.abs(dy)/l;
+      var alpha = Math.asin(sinalpha);
+      var nx = Math.cos(alpha)*collisionDiameter;
+      var ny = Math.sin(alpha)*collisionDiameter;
+      if(dx<0){
+          mover.x=edge.x-nx;
+      }else{
+          mover.x=edge.x+nx;
+      }
+      if(dy<0){
+          mover.y=edge.y-ny;
+      }else{
+          mover.y=edge.y+ny;
+      }
     }
 }
 
@@ -672,21 +683,26 @@ function objectNear(obj,x,y){
 
 /**********************************************
 * Collision Detection. Does this object's movement
-* put it in the same area as some other object
+* put it in the same area as some other object.
+* EDIT: We now return an array of all the objects
+* you collide with rather than just the first.
 */
 function collides(o){
+    var reslist = new Array();
+    var num=0;
     var newX = o.x+o.dx;
     var newY = o.y+o.dy;
     for(var n=0;n<numobjects;n++){
         var obj = objects[n];
-        if(obj==o){continue;}
-        if(obj.collision){
-            if(objectNear(obj,newX,newY)){
-                return obj;
-            }
+        if(obj!=o){
+          if(obj.collision){
+              if(objectNear(obj,newX,newY)){
+                  reslist[num++]=obj;
+              }
+          }
         }
     }
-    return false;
+    return reslist;
 }
 
 
@@ -860,9 +876,14 @@ _root.onEnterFrame = function(){
             obj.moveFunction(objects[n]);
         }
         if((obj.dx!=0)||(obj.dy!=0)){
-            var o;
-            if((obj.collision)&&(o=collides(obj))){
+            if(obj.collision){
+              var o=collides(obj);
+              if(o.length>0){
                 moveToEdge(obj,o);
+              }else{
+                obj.x+=obj.dx;
+                obj.y+=obj.dy;
+              }
             }else{
                 obj.x+=obj.dx;
                 obj.y+=obj.dy;
@@ -878,7 +899,6 @@ _root.onEnterFrame = function(){
     if(!gameEnded){
         var scoreText = "Music: <a href=\""+musicUrls[currentLevel]+"\">"+trackNames[currentLevel]+" by "+bandNames[currentLevel]+"</a><br/><font size=\"25\">Score: ";
         if(score<0){
-          trace("NegScore");
           scoreText+="<font color=\"#ff0000\">"+score+"</font>";
         }else{
           scoreText+=score;
