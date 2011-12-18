@@ -9,9 +9,9 @@ var pirateScale=60;
 var collisionDiameter = 0.08;
 
 var donationAmounts = [-1,0,5,15,30];
-var musicUrls = ["","http://www.jamendo.com/en/album/56441","http://www.jamendo.com/en/album/81276","http://www.jamendo.com/en/album/81276","http://www.jamendo.com/en/album/56441"];
-var bandNames = ["","J.E.L.L.i","Anthony Viscounte","Anthony Viscounte","J.E.L.L.i"];
-var trackNames = ["","Frosty The Snowman","Santa Claus Is Coming To Town","Jingle Bells","Twelve Days Of Christmas"];
+var musicUrls = ["","http://handsomejacks.co.uk/","http://handsomejacks.co.uk","http://handsomejacks.co.uk","http://handsomejacks.co.uk"];
+var bandNames = ["","Handsome Jack's Showband","Handsome Jacks's Showband","Handsomejack's Showband","Handsome Jack's Showband"];
+var trackNames = ["","Fairytale In New York","x","x","x"];
 
 //We define the coordinates of the geometric display.
 //and work out the slope of the lines.
@@ -68,7 +68,7 @@ _root.replayButton.swapDepths(20000);
 */
 _root.tweetButton.onRelease = function(){
   var mess = getMessageFromScore();
-  var url="http://twitter.com/intent/tweet?text="+escape(mess+" - http://dalliance.net/xmas2011/");
+  var url="http://twitter.com/intent/tweet?text="+escape(mess+" - http://handsomejacks.co.uk/index.php/xmas-game");
   trace("Fetched "+url);
   getURL(url);
 }
@@ -79,7 +79,7 @@ _root.donateButton.onRelease = function(){
 }
 _root.facebookButton.onRelease = function(){
   var mess = getMessageFromScore();
-  var url="http://www.facebook.com/share.php?u=http://dalliance.net/xmas2011/";
+  var url="http://www.facebook.com/share.php?u=http://handsomejacks.co.uk/index.php/xmas-game";
   trace("Fetched "+url);
   getURL(url);
 }
@@ -90,7 +90,7 @@ _root.facebookButton.onRelease = function(){
 
 _root.replayButton.onRelease = function(){
     trace("Replay");
-    if(currentLevel>=4){
+    if(currentLevel>=1){
       currentLevel=1;
     }else{
       currentLevel++;
@@ -116,9 +116,16 @@ function userMessage(s){
     _root.userMessageText.htmlText = "<p align=\"center\"><font size=\"30\">"+s+"</font>"+credits+"</p>";
 }
 var credits = "<font size=\"20\"><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>"+
-"<br/><font size=\"30\"><b>Music</b></font>"+
-"<br/>"+trackNames[currentLevel]+" by "+bandNames[currentLevel]+
-"<br/><a href=\""+musicUrls[currentLevel]+"\">"+musicUrls[currentLevel]+"</a>"+
+"<br/><font size=\"30\"><b>Happy Christmas!<br/>From Handsome Jack's Showband</b></font>"+
+"<br/>"+
+"<br/>"+
+"<br/><font size=\"30\"><b>Handsome Jack's Showband</b></font>"+
+"<br/><a href=\"http://handsomejacks.co.uk/\">http://handsomejacks.co.uk/</a>"+
+"<br/>Vocals - Adam"+
+"<br/>Guitar - Paul"+
+"<br/>Bass - Andi"+
+"<br/>Drums - Dom"+
+"<br/>Special Guest - Samm"+
 "<br/>"+
 "<br/><font size=\"30\"><b>Game</b></font>"+
 "<br/>Programming - Adam Priest"+
@@ -171,11 +178,11 @@ var credits = "<font size=\"20\"><br><br><br><br><br><br><br><br><br><br><br><br
 */
 function getMessageFromScore(){
     if(_root.piratesHappy<1){
-        return "I just failed to impress any pirates in Santa's Pirate Drinking game!  Can you do better?";
+        return "I just failed to impress any pirates in Handsome Jack's Xmas game!  Can you do better?";
     }else if(_root.piratesHappy<np){
-        return "Woo!, I kept "+_root.piratesHappy+"/"+np+" pirates happy in Santa's Pirate Drinking game.  Can you do better?";
+        return "Woo!, I kept "+_root.piratesHappy+"/"+np+" pirates happy in Handsome Jack's Xmas game.  Can you do better?";
     }else{
-        return "Woo! I rock! I impressed ALL the pirates in Santa's Pirate Drinking game. Try and beat me!";
+        return "Woo! I rock! I impressed ALL the pirates in Handsome Jack's Xmas game. Try and beat me!";
     }
 }
 
@@ -447,15 +454,11 @@ function endGame(){
     }else{
         userMessage("<b>Excellent!</b><br/><br/>You impressed ALL "+np+" of the pirates.");
     }
-    if(currentLevel<4){
-      this.replayButton.label = "Next Level";
-    }else{
-      this.replayButton.label = "Replay";
-    }
+    this.replayButton.label = "Replay";
     _root.replayButton._visible=true;
     _root.facebookButton._visible=true;
     _root.tweetButton._visible=true;
-    _root.donateButton._visible=true;
+//    _root.donateButton._visible=true;
     gameEnded=1;
 }
 
@@ -742,12 +745,16 @@ function setup(x){
     if(currentLevel==1){
       santa = addObject("Santa",0,0,1,0,0,0,0,-1,moveSanta,santaScale,true);
       santa._yscale=santaScale*2;
-      pirates[np] = addObject("PirateAtSeat",1,0.31,0.76,0,0,0,0,-1,movePirate,pirateScale,true); setupPirate(pirates[np++]);
-      pirates[np] = addObject("PirateAtSeat",3,0.22,0.77,0,0,0,0,-1,movePirate,pirateScale,true); setupPirate(pirates[np++]);
-      pirates[np] = addObject("PirateAtSeat",0,0.27,0.66,0,0,0,0,-1,movePirate,pirateScale,true); setupPirate(pirates[np++]);
-      pirates[np] = addObject("PirateAtSeat",2,0.39,0.66,0,0,0,0,-1,movePirate,pirateScale,true); setupPirate(pirates[np++]);
-      pirates[np] = addObject("PirateAtSeat",0,0.39,0.31,0,0,0,0,-1,movePirate,pirateScale,true); setupPirate(pirates[np++]);
-      pirates[np] = addObject("PirateAtSeat",2,0.7,0.49,0,0,0,0,-1,movePirate,pirateScale,true); setupPirate(pirates[np++]);
+      pirates[np] = addObject("PirateAtSeat",2,0.75,0.46,0,0,0,0,-1,movePirate,pirateScale,true); setupPirate(pirates[np++]);
+      pirates[np] = addObject("PirateAtSeat",0,0.33,0.32,0,0,0,0,-1,movePirate,pirateScale,true); setupPirate(pirates[np++]);
+      pirates[np] = addObject("PirateAtSeat",2,0.43,0.75,0,0,0,0,-1,movePirate,pirateScale,true); setupPirate(pirates[np++]);
+      pirates[np] = addObject("PirateAtSeat",2,0.45,0.67,0,0,0,0,-1,movePirate,pirateScale,true); setupPirate(pirates[np++]);
+      pirates[np] = addObject("PirateAtSeat",2,0.25,0.75,0,0,0,0,-1,movePirate,pirateScale,true); setupPirate(pirates[np++]);
+      pirates[np] = addObject("PirateAtSeat",2,0.27,0.66,0,0,0,0,-1,movePirate,pirateScale,true); setupPirate(pirates[np++]);
+      pirates[np] = addObject("PirateAtSeat",2,0.58,0.35,0,0,0,0,-1,movePirate,pirateScale,true); setupPirate(pirates[np++]);
+      pirates[np] = addObject("PirateAtSeat",0,0.43,0.27,0,0,0,0,-1,movePirate,pirateScale,true); setupPirate(pirates[np++]);
+      pirates[np] = addObject("PirateAtSeat",0,0.53,0.25,0,0,0,0,-1,movePirate,pirateScale,true); setupPirate(pirates[np++]);
+      pirates[np] = addObject("PirateAtSeat",2,0.39,0.87,0,0,0,0,-1,movePirate,pirateScale,true); setupPirate(pirates[np++]);
     }else if(currentLevel==2){
       santa = addObject("Santa",0,0.2,0.8,0,0,0,0,-1,moveSanta,santaScale,true);
       santa._yscale=santaScale*2;
@@ -804,6 +811,7 @@ function setup(x){
   netStream.onStatus = onNetStatus;                                                                   
   _root.videoClip.attachVideo(netStream);
   netStream.play("level"+currentLevel+".flv");
+  netStream.seek(0);
 
 }
 setup();
@@ -843,7 +851,7 @@ function levelNotYetFree(){
   _root.replayButton._visible=true;
   _root.facebookButton._visible=true;
   _root.tweetButton._visible=true;
-  _root.donateButton._visible=true;
+//  _root.donateButton._visible=true;
 }
 
 
